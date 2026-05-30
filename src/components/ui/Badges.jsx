@@ -4,17 +4,10 @@ import { STATUS } from "../../constants/events.js";
 export function Badge({ status, small }) {
   const s = STATUS[status] || STATUS.approved;
   return (
-    <span style={{
-      background: s.bg,
-      color: s.color,
-      border: `1px solid ${s.border}`,
-      padding: small ? "2px 8px" : "3px 10px",
-      borderRadius: 20,
-      fontSize: small ? 11 : 12,
-      fontWeight: 600,
-      whiteSpace: "nowrap",
-      display: "inline-block",
-    }}>
+    <span
+      className={`badge${small ? " badge--small" : ""}`}
+      style={{ "--badge-bg": s.bg, "--badge-color": s.color, "--badge-border": s.border }}
+    >
       {s.label}
     </span>
   );
@@ -30,14 +23,10 @@ export function ParticipationBadge({ status }) {
   if (!s) return null;
 
   return (
-    <span style={{
-      background: s.bg,
-      color: s.color,
-      padding: "2px 8px",
-      borderRadius: 20,
-      fontSize: 11,
-      fontWeight: 600,
-    }}>
+    <span
+      className="participation-badge"
+      style={{ "--badge-bg": s.bg, "--badge-color": s.color }}
+    >
       {s.label}
     </span>
   );

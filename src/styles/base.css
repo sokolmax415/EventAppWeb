@@ -1,0 +1,31 @@
+:root {
+  --bg-page: #f8fafc;
+  --bg-panel: #ffffff;
+  --bg-muted: #f9fafb;
+  --text-main: #111827;
+  --text-muted: #6b7280;
+  --text-soft: #9ca3af;
+  --border: #e5e7eb;
+  --brand: #0f172a;
+  --accent: #6366f1;
+  --danger: #dc2626;
+  --success: #059669;
+  --blue: #2563eb;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-page);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}

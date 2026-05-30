@@ -1,0 +1,143 @@
+.app {
+  min-height: 100vh;
+  background: var(--bg-page);
+}
+
+.demo-bar {
+  background: var(--brand);
+  color: #94a3b8;
+  padding: 8px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.role-switcher,
+.header-left,
+.brand,
+.user-menu,
+.nav {
+  display: flex;
+  align-items: center;
+}
+
+.role-switcher {
+  gap: 8px;
+}
+
+.role-button {
+  background: transparent;
+  color: #94a3b8;
+  border: 1px solid #475569;
+  border-radius: 6px;
+  padding: 3px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.role-button.is-active {
+  background: #fff;
+  color: var(--brand);
+  border-color: #fff;
+  font-weight: 600;
+}
+
+.app-header {
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-left {
+  gap: 16px;
+}
+
+.brand {
+  gap: 8px;
+}
+
+.brand-icon {
+  font-size: 20px;
+}
+
+.brand-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.header-divider {
+  height: 20px;
+  width: 1px;
+  background: var(--border);
+}
+
+.nav {
+  gap: 16px;
+}
+
+.nav-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  border-bottom: 2px solid transparent;
+  padding-bottom: 2px;
+}
+
+.nav-button.is-active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.user-menu {
+  gap: 10px;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #eef2ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4f46e5;
+}
+
+.user-name {
+  font-size: 13px;
+  color: #374151;
+  font-weight: 500;
+}
+
+.role-pill {
+  font-size: 11px;
+  color: var(--text-soft);
+  background: #f3f4f6;
+  border-radius: 10px;
+  padding: 2px 8px;
+}
+
+.main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 20px;
+}
+
+@media (max-width: 700px) {
+  .demo-bar,
+  .app-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+}

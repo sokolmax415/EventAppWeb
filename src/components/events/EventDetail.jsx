@@ -98,30 +98,25 @@ export function EventDetail({ event, role, onBack, onUpdate, onDelete, onApprove
     <div>
       <button
         onClick={onBack}
-        style={{ background: "none", border: "none", cursor: "pointer", color: "#6B7280",
-          fontSize: 13, padding: "0 0 20px", display: "flex", alignItems: "center", gap: 6 }}
+        className="back-button"
       >
         ← Назад к событиям
       </button>
 
-      <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #E5E7EB", padding: 28 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 24 }}>
-          <div style={{ flex: 1 }}>
+      <div className="panel">
+        <div className="detail-title-row">
+          <div className="detail-title-wrap">
             {editing ? (
               <input value={ed.title} onChange={e => patch("title")(e.target.value)}
-                style={{ fontSize: 22, fontWeight: 700, color: "#111827", border: "none",
-                  borderBottom: "2px solid #6366F1", outline: "none", width: "100%", background: "transparent" }} />
+                className="title-input" />
             ) : (
-              <h1 style={{ fontSize: 22, fontWeight: 700, color: "#111827", margin: 0 }}>{event.title}</h1>
+              <h1 className="detail-title">{event.title}</h1>
             )}
           </div>
           <Badge status={effectiveStatus} />
         </div>
 
-        <div style={{
-          display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-          gap: 16, background: "#F9FAFB", borderRadius: 10, padding: 18, marginBottom: 22,
-        }}>
+        <div className="info-grid">
           {[
             { label: "📍 Локация", field: "location", type: "text", value: event.location },
             { label: "🏷 Категория", field: "category", type: "select", value: event.category.name },
@@ -131,11 +126,11 @@ export function EventDetail({ event, role, onBack, onUpdate, onDelete, onApprove
             { label: "👤 Организатор", value: event.creator?.name || "—" },
           ].map(({ label, field, type, value }) => (
             <div key={label}>
-              <div style={{ fontSize: 11, color: "#9CA3AF", marginBottom: 4 }}>{label}</div>
+              <div className="field-label">{label}</div>
               {editing && field ? (
                 type === "select" ? (
                   <select value={ed[field]} onChange={e => patch(field)(e.target.value)}
-                    style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "4px 8px", fontSize: 13, background: "#fff" }}>
+                    className="inline-select">
                     {CATEGORIES.map(c => <option key={c}>{c}</option>)}
                   </select>
                 ) : (
@@ -144,41 +139,37 @@ export function EventDetail({ event, role, onBack, onUpdate, onDelete, onApprove
                     value={ed[field]}
                     min={field === "max_participants" ? Math.max(1, event.current_participants) : undefined}
                     onChange={e => patch(field)(e.target.value)}
-                    style={{ border: `1px solid ${errors[field] ? "#FCA5A5" : "#D1D5DB"}`, borderRadius: 6, padding: "4px 8px",
-                      fontSize: 13, background: "#fff", width: type === "number" ? 80 : "100%", boxSizing: "border-box" }} />
+                    className={`inline-input${type === "number" ? " inline-input--number" : ""}${errors[field] ? " has-error" : ""}`} />
                 )
               ) : (
-                <div style={{ fontSize: 13, fontWeight: 500, color: "#374151" }}>{value}</div>
+                <div className="field-value">{value}</div>
               )}
               {editing && errors[field] && (
-                <div style={{ marginTop: 4, fontSize: 11, color: "#DC2626" }}>{errors[field]}</div>
+                <div className="field-error">{errors[field]}</div>
               )}
             </div>
           ))}
         </div>
 
-        <div style={{ marginBottom: 24 }}>
-          <div style={{ fontSize: 13, fontWeight: 500, color: "#6B7280", marginBottom: 8 }}>Описание</div>
+        <div className="description-block">
+          <div className="section-label">Описание</div>
           {editing ? (
             <textarea value={ed.description} onChange={e => patch("description")(e.target.value)}
-              rows={4} style={{ width: "100%", border: "1px solid #D1D5DB", borderRadius: 8,
-                padding: "8px 12px", fontSize: 13, color: "#374151", resize: "vertical",
-                outline: "none", boxSizing: "border-box" }} />
+              rows={4} className="textarea-edit" />
           ) : (
-            <p style={{ fontSize: 14, color: "#374151", lineHeight: 1.6, margin: 0 }}>{event.description}</p>
+            <p className="description-text">{event.description}</p>
           )}
         </div>
 
-        <div style={{ borderTop: "1px solid #F3F4F6", paddingTop: 20 }}>
+        <div className="actions-section">
           {pm && !isOwnPending && !isAdmin && (
-            <div style={{ background: pm.bg, color: pm.color, borderRadius: 8, padding: "10px 14px",
-              fontSize: 13, fontWeight: 500, marginBottom: 14 }}>
+            <div className="status-message" style={{ "--msg-bg": pm.bg, "--msg-color": pm.color }}>
               {pm.text}
             </div>
           )}
 
           {canEdit && !isAdmin && (
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <div className="actions-row">
               {editing ? (
                 <>
                   <Btn variant="success" onClick={saveEdit}>Сохранить изменения</Btn>
@@ -195,12 +186,12 @@ export function EventDetail({ event, role, onBack, onUpdate, onDelete, onApprove
           )}
 
           {!isOwnPending && !isAdmin && !event.is_finished && (
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <div className="actions-row">
               {partStatus === null && (
                 <>
                   <Btn variant="secondary" onClick={() => participate("planned")}>Планирую посетить</Btn>
                   {isFull ? (
-                    <div style={{ display: "flex", alignItems: "center", fontSize: 13, color: "#DC2626", fontWeight: 500 }}>
+                    <div className="sold-out-message">
                       Все места заняты
                     </div>
                   ) : (
@@ -213,7 +204,7 @@ export function EventDetail({ event, role, onBack, onUpdate, onDelete, onApprove
                   {!isFull && <Btn variant="blue" onClick={() => participate("registered")}>Записаться</Btn>}
                   <Btn variant="secondary" onClick={unparticipate}>Отменить участие</Btn>
                   {isFull && (
-                    <div style={{ display: "flex", alignItems: "center", fontSize: 13, color: "#DC2626", fontWeight: 500 }}>
+                    <div className="sold-out-message">
                       Все места заняты
                     </div>
                   )}
@@ -226,12 +217,12 @@ export function EventDetail({ event, role, onBack, onUpdate, onDelete, onApprove
           )}
 
           {!isOwnPending && !isAdmin && event.is_finished && (
-            <div style={{ fontSize: 13, color: "#9CA3AF" }}>Мероприятие завершено — участие недоступно</div>
+            <div className="muted-note">Мероприятие завершено — участие недоступно</div>
           )}
 
           {isAdmin && (
-            <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+            <div className="actions-stack">
+              <div className="actions-row">
                 {editing ? (
                   <>
                     <Btn variant="success" onClick={saveEdit}>Сохранить изменения</Btn>
@@ -259,7 +250,7 @@ export function EventDetail({ event, role, onBack, onUpdate, onDelete, onApprove
                 />
               )}
               {!event.is_finished && event.status !== "pending" && event.status !== "rejected" && !editing && (
-                <div style={{ fontSize: 13, color: "#9CA3AF" }}>
+                <div className="muted-note">
                   Администратор может редактировать или отменить мероприятие.
                 </div>
               )}

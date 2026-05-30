@@ -81,65 +81,53 @@ export default function App() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F8FAFC", fontFamily: "system-ui, -apple-system, sans-serif" }}>
-      <div style={{ background: "#0F172A", color: "#94A3B8", padding: "8px 20px",
-        display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 13 }}>
+    <div className="app">
+      <div className="demo-bar">
         <span>🎭 Демо-режим — переключайте роли для проверки логики</span>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div className="role-switcher">
           <span>Роль:</span>
           {["student", "admin"].map(r => (
-            <button key={r} onClick={() => switchDemoRole(r)} style={{
-              background: role === r ? "#fff" : "transparent",
-              color: role === r ? "#0F172A" : "#94A3B8",
-              border: "1px solid " + (role === r ? "#fff" : "#475569"),
-              borderRadius: 6,
-              padding: "3px 12px",
-              fontSize: 12,
-              cursor: "pointer",
-              fontWeight: role === r ? 600 : 400,
-            }}>
+            <button
+              key={r}
+              onClick={() => switchDemoRole(r)}
+              className={`role-button${role === r ? " is-active" : ""}`}
+            >
               {r === "student" ? "Студент" : "Администратор"}
             </button>
           ))}
         </div>
       </div>
 
-      <header style={{ background: "#fff", borderBottom: "1px solid #E5E7EB",
-        padding: "14px 24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 20 }}>🗓</span>
-            <span style={{ fontSize: 17, fontWeight: 700, color: "#111827", letterSpacing: "-0.3px" }}>EventHub</span>
+      <header className="app-header">
+        <div className="header-left">
+          <div className="brand">
+            <span className="brand-icon">🗓</span>
+            <span className="brand-name">EventHub</span>
           </div>
-          <div style={{ height: 20, width: 1, background: "#E5E7EB" }} />
-          <nav style={{ display: "flex", gap: 16 }}>
-            <button onClick={() => setView("list")}
-              style={{ background: "none", border: "none", cursor: "pointer",
-                fontSize: 13, fontWeight: 500,
-                color: view === "list" ? "#6366F1" : "#6B7280",
-                borderBottom: view === "list" ? "2px solid #6366F1" : "2px solid transparent",
-                paddingBottom: 2 }}>
+          <div className="header-divider" />
+          <nav className="nav">
+            <button
+              onClick={() => setView("list")}
+              className={`nav-button${view === "list" ? " is-active" : ""}`}
+            >
               Мероприятия
             </button>
           </nav>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#EEF2FF",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 12, fontWeight: 600, color: "#4F46E5" }}>
+        <div className="user-menu">
+          <div className="avatar">
             {role === "admin" ? "A" : "АИ"}
           </div>
-          <span style={{ fontSize: 13, color: "#374151", fontWeight: 500 }}>
+          <span className="user-name">
             {currentUser.name}
           </span>
-          <span style={{ fontSize: 11, color: "#9CA3AF", background: "#F3F4F6",
-            borderRadius: 10, padding: "2px 8px" }}>
+          <span className="role-pill">
             {role === "admin" ? "admin" : "student"}
           </span>
         </div>
       </header>
 
-      <main style={{ maxWidth: 900, margin: "0 auto", padding: "32px 20px" }}>
+      <main className="main">
         {view === "list" && (
           <EventsList
             events={events}

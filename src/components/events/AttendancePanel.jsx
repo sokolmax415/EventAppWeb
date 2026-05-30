@@ -5,36 +5,27 @@ import { ParticipationBadge } from "../ui/Badges.jsx";
 export function AttendancePanel({ participants = [], onConfirmAttendance }) {
   if (!participants.length) {
     return (
-      <div style={{ fontSize: 13, color: "#9CA3AF" }}>
+      <div className="muted-note">
         У этого мероприятия пока нет участников для подтверждения.
       </div>
     );
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      <div style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>Подтверждение участия</div>
+    <div className="attendance-list">
+      <div className="attendance-title">Подтверждение участия</div>
       {participants.map(user => {
         const isAttended = user.status === "attended";
         return (
           <div
             key={user.user_id}
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: 12,
-              border: "1px solid #E5E7EB",
-              borderRadius: 10,
-              padding: "10px 12px",
-              background: isAttended ? "#F0FDF4" : "#fff",
-            }}
+            className={`attendance-row${isAttended ? " is-attended" : ""}`}
           >
             <div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: "#111827" }}>{user.name}</div>
-              <div style={{ fontSize: 12, color: "#6B7280" }}>{user.email}</div>
+              <div className="person-name">{user.name}</div>
+              <div className="person-email">{user.email}</div>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div className="attendance-actions">
               <ParticipationBadge status={user.status} />
               <Btn
                 variant={isAttended ? "secondary" : "success"}

@@ -71,76 +71,63 @@ export function CreateEventForm({ role, currentUser, onSubmit, onCancel }) {
 
   function field(key, label, el) {
     return (
-      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-        <label style={{ fontSize: 13, fontWeight: 500, color: "#4B5563" }}>{label}</label>
+      <div className="form-field">
+        <label className="form-label">{label}</label>
         {el}
-        {errors[key] && <span style={{ fontSize: 11, color: "#DC2626" }}>{errors[key]}</span>}
+        {errors[key] && <span className="field-error">{errors[key]}</span>}
       </div>
     );
   }
 
-  const inputStyle = {
-    border: "1px solid #D1D5DB",
-    borderRadius: 8,
-    padding: "8px 12px",
-    fontSize: 13,
-    color: "#111827",
-    outline: "none",
-    width: "100%",
-    boxSizing: "border-box",
-    background: "#fff",
-  };
-
   return (
     <div>
       <button onClick={onCancel}
-        style={{ background: "none", border: "none", cursor: "pointer", color: "#6B7280",
-          fontSize: 13, padding: "0 0 20px", display: "flex", alignItems: "center", gap: 6 }}>
+        className="back-button">
         ← Назад
       </button>
 
-      <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #E5E7EB", padding: 28 }}>
-        <h2 style={{ fontSize: 20, fontWeight: 700, color: "#111827", margin: "0 0 24px" }}>
+      <div className="panel">
+        <h2 className="form-title">
           {isAdmin ? "Создать мероприятие" : "Предложить мероприятие"}
         </h2>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+        <div className="form">
           {field("title", "Название *",
             <input value={form.title} onChange={p("title")} placeholder="Название мероприятия"
-              style={{ ...inputStyle, borderColor: errors.title ? "#FCA5A5" : "#D1D5DB" }} />
+              className={`form-input${errors.title ? " has-error" : ""}`} />
           )}
           {field("description", "Описание",
             <textarea value={form.description} onChange={p("description")}
               placeholder="Расскажите о мероприятии" rows={4}
-              style={{ ...inputStyle, resize: "vertical" }} />
+              className="form-textarea" />
           )}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          <div className="form-grid">
             {field("category", "Категория",
-              <select value={form.category} onChange={p("category")} style={inputStyle}>
+              <select value={form.category} onChange={p("category")} className="form-select">
                 {CATEGORIES.map(c => <option key={c}>{c}</option>)}
               </select>
             )}
             {field("location", "Локация *",
               <input value={form.location} onChange={p("location")} placeholder="Город или Онлайн"
-                style={{ ...inputStyle, borderColor: errors.location ? "#FCA5A5" : "#D1D5DB" }} />
+                className={`form-input${errors.location ? " has-error" : ""}`} />
             )}
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          <div className="form-grid">
             {field("start_time", "Начало *",
               <input type="datetime-local" value={form.start_time} min={minDateTime} onChange={p("start_time")}
-                style={{ ...inputStyle, borderColor: errors.start_time ? "#FCA5A5" : "#D1D5DB" }} />
+                className={`form-input${errors.start_time ? " has-error" : ""}`} />
             )}
             {field("end_time", "Конец *",
               <input type="datetime-local" value={form.end_time} min={form.start_time || minDateTime} onChange={p("end_time")}
-                style={{ ...inputStyle, borderColor: errors.end_time ? "#FCA5A5" : "#D1D5DB" }} />
+                className={`form-input${errors.end_time ? " has-error" : ""}`} />
             )}
           </div>
           {field("max_participants", "Макс. участников",
             <input type="number" value={form.max_participants} onChange={p("max_participants")}
-              min={1} max={10000} style={{ ...inputStyle, width: 120 }} />
+              min={1} max={10000} className={`form-input form-input--number${errors.max_participants ? " has-error" : ""}`} />
           )}
 
-          <div style={{ display: "flex", gap: 10, paddingTop: 6 }}>
+          <div className="form-actions">
             <Btn variant="primary" onClick={handleSubmit}>
               {isAdmin ? "Создать и опубликовать" : "Отправить на модерацию"}
             </Btn>
