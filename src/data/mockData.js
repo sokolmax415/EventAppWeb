@@ -122,3 +122,30 @@ export const USERS_BY_ROLE = {
     balance: 0,
   },
 };
+
+export const MOCK_ACHIEVEMENTS = [
+  {
+    achievement_id: "achievement-1",
+    user_id: "user-student",
+    title: "Первое мероприятие",
+    description: "Посетил первое мероприятие",
+    reward_amount: 10,
+    awarded_at: "2025-02-20T14:00:00Z",
+  },
+  {
+    achievement_id: "achievement-2",
+    user_id: "user-student",
+    title: "Активный участник",
+    description: "Записался на 5 мероприятий",
+    reward_amount: 25,
+    awarded_at: "2025-03-05T11:30:00Z",
+  },
+  {
+    achievement_id: "achievement-3",
+    user_id: "user-admin",
+    title: "Модератор",
+    description: "Проверил первое мероприятие",
+    reward_amount: 0,
+    awarded_at: "2025-03-10T09:00:00Z",
+  },
+];

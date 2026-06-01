@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { INIT_EVENTS, USERS_BY_ROLE } from "./src/data/mockData.js";
+import { INIT_EVENTS, USERS_BY_ROLE, MOCK_ACHIEVEMENTS } from "./src/data/mockData.js";
 import { EventsList } from "./src/components/events/EventsList.jsx";
 import { EventDetail } from "./src/components/events/EventDetail.jsx";
 import { CreateEventForm } from "./src/components/events/CreateEventForm.jsx";
 import { ToastStack } from "./src/components/ui/ToastStack.jsx";
+import ProfilePage from "./src/components/profile/ProfilePage.jsx";
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(USERS_BY_ROLE.student);
@@ -13,65 +14,122 @@ export default function App() {
   const [toasts, setToasts] = useState([]);
 
   const role = currentUser.role;
-  const selectedEvent = events.find(e => e.id === selectedId);
+  const selectedEvent = events.find((event) => event.id === selectedId);
 
   function showToast(message) {
     const id = Date.now() + Math.random();
-    setToasts(prev => [...prev, { id, message }]);
+
+    setToasts((prev) => [...prev, { id, message }]);
+
     setTimeout(() => {
-      setToasts(prev => prev.filter(toast => toast.id !== id));
+      setToasts((prev) => prev.filter((toast) => toast.id !== id));
     }, 2600);
   }
 
   function handleUpdate(upd) {
-    setEvents(prev => prev.map(e => e.id === upd.id ? upd : e));
+    setEvents((prev) => prev.map((event) => (event.id === upd.id ? upd : event)));
     showToast(`Мероприятие «${upd.title}» обновлено`);
   }
 
   function handleDelete(id) {
-    const event = events.find(e => e.id === id);
-    setEvents(prev => prev.map(e => e.id === id ? { ...e, status: "cancelled" } : e));
+    const event = events.find((event) => event.id === id);
+
+    setEvents((prev) =>
+      prev.map((event) =>
+        event.id === id ? { ...event, status: "cancelled" } : event
+      )
+    );
+
     setView("list");
-    if (event) showToast(`Мероприятие «${event.title}» удалено`);
+    setSelectedId(null);
+
+    if (event) {
+      showToast(`Мероприятие «${event.title}» удалено`);
+    }
   }
 
   function handleCreate(ev) {
-    setEvents(prev => [...prev, ev]);
+    setEvents((prev) => [...prev, ev]);
     setView("list");
-    showToast(`Мероприятие «${ev.title}» ${ev.status === "approved" ? "создано" : "отправлено на модерацию"}`);
+
+    showToast(
+      `Мероприятие «${ev.title}» ${
+        ev.status === "approved" ? "создано" : "отправлено на модерацию"
+      }`
+    );
   }
 
   function handleApprove(id) {
-    const event = events.find(e => e.id === id);
-    setEvents(prev => prev.map(e => e.id === id ? {
-      ...e,
-      status: "approved",
-      moderated_by: { id: currentUser.user_id, name: currentUser.name },
-    } : e));
-    if (event) showToast(`Мероприятие «${event.title}» одобрено`);
+    const event = events.find((event) => event.id === id);
+
+    setEvents((prev) =>
+      prev.map((event) =>
+        event.id === id
+          ? {
+              ...event,
+              status: "approved",
+              moderated_by: {
+                id: currentUser.user_id,
+                name: currentUser.name,
+              },
+            }
+          : event
+      )
+    );
+
+    if (event) {
+      showToast(`Мероприятие «${event.title}» одобрено`);
+    }
   }
 
   function handleReject(id) {
-    const event = events.find(e => e.id === id);
-    setEvents(prev => prev.map(e => e.id === id ? {
-      ...e,
-      status: "rejected",
-      moderated_by: { id: currentUser.user_id, name: currentUser.name },
-    } : e));
-    if (event) showToast(`Мероприятие «${event.title}» отклонено`);
+    const event = events.find((event) => event.id === id);
+
+    setEvents((prev) =>
+      prev.map((event) =>
+        event.id === id
+          ? {
+              ...event,
+              status: "rejected",
+              moderated_by: {
+                id: currentUser.user_id,
+                name: currentUser.name,
+              },
+            }
+          : event
+      )
+    );
+
+    if (event) {
+      showToast(`Мероприятие «${event.title}» отклонено`);
+    }
   }
 
   function handleConfirmAttendance(eventId, userId) {
-    const event = events.find(e => e.id === eventId);
-    const user = event?.participants?.find(participant => participant.user_id === userId);
-    setEvents(prev => prev.map(e => {
-      if (e.id !== eventId) return e;
-      const participants = (e.participants || []).map(user =>
-        user.user_id === userId ? { ...user, status: "attended" } : user
+    const event = events.find((event) => event.id === eventId);
+    const user = event?.participants?.find(
+      (participant) => participant.user_id === userId
+    );
+
+    setEvents((prev) =>
+      prev.map((event) => {
+        if (event.id !== eventId) return event;
+
+        const participants = (event.participants || []).map((participant) =>
+          participant.user_id === userId
+            ? { ...participant, status: "attended" }
+            : participant
+        );
+
+        return { ...event, participants };
+      })
+    );
+
+    if (event && user) {
+      showToast(
+        `Участие ${user.name} в мероприятии «${event.title}» подтверждено`
       );
-      return { ...e, participants };
-    }));
-    if (event && user) showToast(`Участие ${user.name} в мероприятии «${event.title}» подтверждено`);
+    }
   }
 
   function switchDemoRole(nextRole) {
@@ -80,19 +138,26 @@ export default function App() {
     setSelectedId(null);
   }
 
+  function openProfile() {
+    setView("profile");
+    setSelectedId(null);
+  }
+
   return (
     <div className="app">
       <div className="demo-bar">
         <span>🎭 Демо-режим — переключайте роли для проверки логики</span>
+
         <div className="role-switcher">
           <span>Роль:</span>
-          {["student", "admin"].map(r => (
+
+          {["student", "admin"].map((roleName) => (
             <button
-              key={r}
-              onClick={() => switchDemoRole(r)}
-              className={`role-button${role === r ? " is-active" : ""}`}
+              key={roleName}
+              onClick={() => switchDemoRole(roleName)}
+              className={`role-button${role === roleName ? " is-active" : ""}`}
             >
-              {r === "student" ? "Студент" : "Администратор"}
+              {roleName === "student" ? "Студент" : "Администратор"}
             </button>
           ))}
         </div>
@@ -104,27 +169,47 @@ export default function App() {
             <span className="brand-icon">🗓</span>
             <span className="brand-name">EventHub</span>
           </div>
+
           <div className="header-divider" />
+
           <nav className="nav">
             <button
-              onClick={() => setView("list")}
+              onClick={() => {
+                setView("list");
+                setSelectedId(null);
+              }}
               className={`nav-button${view === "list" ? " is-active" : ""}`}
             >
               Мероприятия
             </button>
+
+            <button
+              onClick={openProfile}
+              className={`nav-button${view === "profile" ? " is-active" : ""}`}
+            >
+              Профиль
+            </button>
           </nav>
         </div>
-        <div className="user-menu">
-          <div className="avatar">
-            {role === "admin" ? "A" : "АИ"}
-          </div>
-          <span className="user-name">
-            {currentUser.name}
-          </span>
+
+        <button
+          type="button"
+          className="user-menu"
+          onClick={openProfile}
+          style={{
+            border: "none",
+            background: "transparent",
+            cursor: "pointer",
+          }}
+        >
+          <div className="avatar">{role === "admin" ? "A" : "АИ"}</div>
+
+          <span className="user-name">{currentUser.name}</span>
+
           <span className="role-pill">
             {role === "admin" ? "admin" : "student"}
           </span>
-        </div>
+        </button>
       </header>
 
       <main className="main">
@@ -132,15 +217,30 @@ export default function App() {
           <EventsList
             events={events}
             role={role}
-            onEventClick={id => { setSelectedId(id); setView("detail"); }}
+            onEventClick={(id) => {
+              setSelectedId(id);
+              setView("detail");
+            }}
             onCreateClick={() => setView("create")}
           />
         )}
+
+        {view === "profile" && (
+  <ProfilePage
+    currentUser={currentUser}
+    events={events}
+    achievements={MOCK_ACHIEVEMENTS}
+  />
+)}
+
         {view === "detail" && selectedEvent && (
           <EventDetail
             event={selectedEvent}
             role={role}
-            onBack={() => setView("list")}
+            onBack={() => {
+              setView("list");
+              setSelectedId(null);
+            }}
             onUpdate={handleUpdate}
             onDelete={handleDelete}
             onApprove={handleApprove}
@@ -148,6 +248,7 @@ export default function App() {
             onConfirmAttendance={handleConfirmAttendance}
           />
         )}
+
         {view === "create" && (
           <CreateEventForm
             role={role}
