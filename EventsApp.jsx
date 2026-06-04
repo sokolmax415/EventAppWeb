@@ -1,13 +1,15 @@
 import React, { useState } from "react";
-import { INIT_EVENTS, USERS_BY_ROLE } from "./src/data/mockData.js";
+import { INIT_EVENTS, INIT_USERS, USERS_BY_ROLE } from "./src/data/mockData.js";
 import { EventsList } from "./src/components/events/EventsList.jsx";
 import { EventDetail } from "./src/components/events/EventDetail.jsx";
 import { CreateEventForm } from "./src/components/events/CreateEventForm.jsx";
 import { ToastStack } from "./src/components/ui/ToastStack.jsx";
+import { UsersList } from "./src/components/users/UsersList.jsx";
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(USERS_BY_ROLE.student);
   const [events, setEvents] = useState(INIT_EVENTS);
+  const [users, setUsers] = useState(INIT_USERS);
   const [view, setView] = useState("list");
   const [selectedId, setSelectedId] = useState(null);
   const [toasts, setToasts] = useState([]);
@@ -74,9 +76,19 @@ export default function App() {
     if (event && user) showToast(`Участие ${user.name} в мероприятии «${event.title}» подтверждено`);
   }
 
+  function handleUserRoleChange(userId, nextRole) {
+    const user = users.find(item => item.user_id === userId);
+    setUsers(prev => prev.map(item =>
+      item.user_id === userId ? { ...item, role: nextRole } : item
+    ));
+    if (user) {
+      showToast(`Роль пользователя «${user.name}» изменена на ${nextRole === "admin" ? "администратор" : "студент"}`);
+    }
+  }
+
   function switchDemoRole(nextRole) {
     setCurrentUser(USERS_BY_ROLE[nextRole]);
-    setView("list");
+    setView(nextRole === "admin" ? view : "list");
     setSelectedId(null);
   }
 
@@ -108,10 +120,18 @@ export default function App() {
           <nav className="nav">
             <button
               onClick={() => setView("list")}
-              className={`nav-button${view === "list" ? " is-active" : ""}`}
+              className={`nav-button${["list", "detail", "create"].includes(view) ? " is-active" : ""}`}
             >
               Мероприятия
             </button>
+            {role === "admin" && (
+              <button
+                onClick={() => setView("users")}
+                className={`nav-button${view === "users" ? " is-active" : ""}`}
+              >
+                Пользователи
+              </button>
+            )}
           </nav>
         </div>
         <div className="user-menu">
@@ -154,6 +174,13 @@ export default function App() {
             currentUser={currentUser}
             onSubmit={handleCreate}
             onCancel={() => setView("list")}
+          />
+        )}
+        {view === "users" && role === "admin" && (
+          <UsersList
+            users={users}
+            currentUserId={currentUser.user_id}
+            onRoleChange={handleUserRoleChange}
           />
         )}
       </main>

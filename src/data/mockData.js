@@ -122,3 +122,42 @@ export const USERS_BY_ROLE = {
     balance: 0,
   },
 };
+
+export const INIT_USERS = [
+  {
+    user_id: "user-student",
+    email: "alexey@example.com",
+    name: "Алексей Иванов",
+    role: "student",
+  },
+  {
+    user_id: "u101",
+    email: "ekaterina@example.com",
+    name: "Екатерина Морозова",
+    role: "student",
+  },
+  {
+    user_id: "u102",
+    email: "nikita@example.com",
+    name: "Никита Павлов",
+    role: "student",
+  },
+  {
+    user_id: "u103",
+    email: "maria@example.com",
+    name: "Мария Соколова",
+    role: "student",
+  },
+  {
+    user_id: "u201",
+    email: "moderator@example.com",
+    name: "Ирина Кузнецова",
+    role: "admin",
+  },
+  {
+    user_id: "user-admin",
+    email: "admin@example.com",
+    name: "Admin",
+    role: "admin",
+  },
+];
