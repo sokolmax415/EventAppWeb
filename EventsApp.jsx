@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 
-import { INIT_EVENTS, USERS_BY_ROLE, } from "./src/data/mockData.js";
-import { INIT_EVENTS, INIT_USERS, USERS_BY_ROLE, MOCK_ACHIEVEMENTS  } from "./src/data/mockData.js";
+import { INIT_EVENTS, USERS_BY_ROLE, MOCK_ACHIEVEMENTS, INIT_USERS, MOCK_NOTIFICATIONS } from "./src/data/mockData.js";
 import { EventsList } from "./src/components/events/EventsList.jsx";
 import { EventDetail } from "./src/components/events/EventDetail.jsx";
 import { CreateEventForm } from "./src/components/events/CreateEventForm.jsx";
 import { ToastStack } from "./src/components/ui/ToastStack.jsx";
 import ProfilePage from "./src/components/profile/ProfilePage.jsx";
 import { UsersList } from "./src/components/users/UsersList.jsx";
+import { NotificationsDropdown } from "./src/components/notifications/NotificationsDropdown.jsx";
+import { NotificationDetailPage } from "./src/components/notifications/NotificationDetailPage.jsx";
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(USERS_BY_ROLE.student);
@@ -16,9 +17,39 @@ export default function App() {
   const [view, setView] = useState("list");
   const [selectedId, setSelectedId] = useState(null);
   const [toasts, setToasts] = useState([]);
+  const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
+  const [selectedNotificationId, setSelectedNotificationId] = useState(null);
 
   const role = currentUser.role;
   const selectedEvent = events.find((event) => event.id === selectedId);
+ 
+const currentUserNotifications = notifications.filter(
+  (notification) => notification.user_id === currentUser.user_id
+);
+
+const selectedNotification = notifications.find(
+  (notification) => notification.id === selectedNotificationId
+);
+function handleOpenNotification(notificationId) {
+  setNotifications((prev) =>
+    prev.map((notification) =>
+      notification.id === notificationId
+        ? { ...notification, is_read: true }
+        : notification
+    )
+  );
+
+  setSelectedNotificationId(notificationId);
+  setSelectedId(null);
+  setView("notification-detail");
+}
+function switchDemoRole(nextRole) {
+  setCurrentUser(USERS_BY_ROLE[nextRole]);
+  setView("list");
+  setSelectedId(null);
+  setSelectedNotificationId(null);
+}
+
 
   function showToast(message) {
     const id = Date.now() + Math.random();
@@ -211,6 +242,12 @@ export default function App() {
             )}
           </nav>
         </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+
+  <NotificationsDropdown
+  notifications={currentUserNotifications}
+  onNotificationClick={handleOpenNotification}
+/>
 
         <button
           type="button"
@@ -230,7 +267,9 @@ export default function App() {
             {role === "admin" ? "admin" : "student"}
           </span>
         </button>
+        </div>
       </header>
+      
 
       <main className="main">
         {view === "list" && (
@@ -250,6 +289,16 @@ export default function App() {
     currentUser={currentUser}
     events={events}
     achievements={MOCK_ACHIEVEMENTS}
+  />
+)
+}
+{view === "notification-detail" && (
+  <NotificationDetailPage
+    notification={selectedNotification}
+    onBack={() => {
+      setView("list");
+      setSelectedNotificationId(null);
+    }}
   />
 )}
 
