@@ -1,15 +1,14 @@
 import React, { useState } from "react";
-import { CATEGORIES } from "../../constants/events.js";
 import { getMinDateTimeLocal } from "../../utils/date.js";
 import { Btn } from "../ui/Button.jsx";
 
-export function CreateEventForm({ role, currentUser, onSubmit, onCancel }) {
+export function CreateEventForm({ role, currentUser, categories = [], onSubmit, onCancel }) {
   const isAdmin = role === "admin";
   const minDateTime = getMinDateTimeLocal();
   const [form, setForm] = useState({
     title: "",
     description: "",
-    category: "IT",
+    category_id: "",          // ← храним ID категории
     location: "",
     start_time: "",
     end_time: "",
@@ -26,6 +25,7 @@ export function CreateEventForm({ role, currentUser, onSubmit, onCancel }) {
     const maxParticipants = Number(form.max_participants);
     if (!form.title.trim()) e.title = "Обязательное поле";
     if (!form.location.trim()) e.location = "Обязательное поле";
+    if (!form.category_id) e.category_id = "Выберите категорию";
     if (!Number.isInteger(maxParticipants) || maxParticipants < 1) {
       e.max_participants = "Количество участников должно быть больше 0";
     }
@@ -49,16 +49,20 @@ export function CreateEventForm({ role, currentUser, onSubmit, onCancel }) {
       setErrors(e);
       return;
     }
+    // Выбираем название категории для отображения (не обязательно для API)
+    const selectedCategory = categories.find(cat => cat.id === form.category_id);
     onSubmit({
-      id: "new-" + Date.now(),
+      category_id: form.category_id,          // ← отправляем ID
       title: form.title.trim(),
       description: form.description.trim(),
       location: form.location.trim(),
-      category: { id: "new", name: form.category },
       start_time: form.start_time + ":00Z",
       end_time: form.end_time + ":00Z",
-      current_participants: 0,
       max_participants: Number(form.max_participants),
+      // Ниже поля, которые могут быть нужны для временного отображения в UI (но бэкенд их перезапишет)
+      // Они не обязательны для API, но могут использоваться в локальном состоянии.
+      category: { id: form.category_id, name: selectedCategory?.name || "" },
+      current_participants: 0,
       my_participation_status: null,
       is_creator: !isAdmin,
       is_finished: false,
@@ -68,7 +72,7 @@ export function CreateEventForm({ role, currentUser, onSubmit, onCancel }) {
       participants: [],
     });
   }
-
+  
   function field(key, label, el) {
     return (
       <div className="form-field">
@@ -81,8 +85,7 @@ export function CreateEventForm({ role, currentUser, onSubmit, onCancel }) {
 
   return (
     <div>
-      <button onClick={onCancel}
-        className="back-button">
+      <button onClick={onCancel} className="back-button">
         ← Назад
       </button>
 
@@ -102,10 +105,13 @@ export function CreateEventForm({ role, currentUser, onSubmit, onCancel }) {
               className="form-textarea" />
           )}
           <div className="form-grid">
-            {field("category", "Категория",
-              <select value={form.category} onChange={p("category")} className="form-select">
-                {CATEGORIES.map(c => <option key={c}>{c}</option>)}
-              </select>
+            {field("category_id", "Категория *",
+            <select value={form.category_id} onChange={e => setForm({...form, category_id: e.target.value})} className="form-select">
+            <option value="">Выберите категорию</option>
+            {categories.map(cat => (
+              <option key={cat.id} value={cat.id}>{cat.name}</option>
+            ))}
+          </select>
             )}
             {field("location", "Локация *",
               <input value={form.location} onChange={p("location")} placeholder="Город или Онлайн"

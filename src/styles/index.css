@@ -4,3 +4,126 @@
 @import "./events.css";
 @import "./forms.css";
 @import "./users.css";
+
+/* LoginPage styles */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0e1a;
+  padding: 1rem;
+}
+
+.login-card {
+  background: linear-gradient(135deg, #111827 0%, #1a2235 100%);
+  border: 1px solid #1e3a5f;
+  border-radius: 20px;
+  padding: 2rem 2rem 2.5rem;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.5);
+}
+
+.login-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.login-header .brand-icon {
+  font-size: 2rem;
+}
+
+.login-header .brand-name {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #e0e6f0;
+}
+
+.login-card h2 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1.4rem;
+  text-align: center;
+  margin: 0 0 1.8rem;
+  color: #e0e6f0;
+  letter-spacing: -0.3px;
+}
+
+.input-group {
+  margin-bottom: 1.2rem;
+}
+
+.input-group label {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6b8cba;
+  margin-bottom: 0.3rem;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.input-group input {
+  width: 100%;
+  background: #0a0e1a;
+  border: 1px solid #1e3a5f;
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  color: #e0e6f0;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.3);
+}
+
+.login-button {
+  width: 100%;
+  background: #3b82f6;
+  border: none;
+  border-radius: 40px;
+  padding: 0.8rem;
+  color: white;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: background 0.2s;
+}
+
+.login-button:hover {
+  background: #2563eb;
+}
+
+.toggle-auth {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: #6b8cba;
+  padding: 0.8rem;
+  margin-top: 0.5rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: color 0.2s;
+}
+
+.toggle-auth:hover {
+  color: #93c5fd;
+}
+
+.error-message {
+  background: rgba(248,113,113,0.15);
+  border-left: 3px solid #f87171;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  color: #fca5a5;
+}
