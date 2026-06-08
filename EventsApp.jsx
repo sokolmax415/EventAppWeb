@@ -43,6 +43,15 @@ function handleOpenNotification(notificationId) {
   setSelectedId(null);
   setView("notification-detail");
 }
+
+function handleUpdateProfile(updatedProfile) {
+  setCurrentUser((prev) => ({
+    ...prev,
+    ...updatedProfile,
+  }));
+
+  showToast("Профиль обновлён");
+}
 function switchDemoRole(nextRole) {
   setCurrentUser(USERS_BY_ROLE[nextRole]);
   setView("list");
@@ -289,9 +298,9 @@ function switchDemoRole(nextRole) {
     currentUser={currentUser}
     events={events}
     achievements={MOCK_ACHIEVEMENTS}
+    onUpdateProfile={handleUpdateProfile}
   />
-)
-}
+)}
 {view === "notification-detail" && (
   <NotificationDetailPage
     notification={selectedNotification}
