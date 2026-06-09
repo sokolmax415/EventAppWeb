@@ -9,7 +9,7 @@ export function AuthProvider({ children }) {
 
   const fetchMe = async (token) => {
     console.log(token)
-    const API_BASE = 'http://127.0.0.1:8080'
+    const API_BASE = '/api'
     const res = await fetch(`${API_BASE}/me`, {
       headers: { Authorization: `Bearer ${token}` }
     })
