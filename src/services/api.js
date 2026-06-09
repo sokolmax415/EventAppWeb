@@ -4,6 +4,13 @@ const API_BASE = 'http://127.0.0.1:8080'
 
 async function request(endpoint, options = {}) {
   const { data: { session } } = await supabase.auth.getSession()
+
+  if (!session?.access_token) {
+    await supabase.auth.signOut();
+    window.location.href = '/login';
+    throw new Error('No session');
+  }
+
   const token = session?.access_token
 
   const res = await fetch(`${API_BASE}${endpoint}`, {

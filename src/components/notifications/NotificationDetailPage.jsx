@@ -5,7 +5,6 @@ export function NotificationDetailPage({ notification, onBack }) {
     return (
       <div>
         <button
-          type="button"
           onClick={onBack}
           style={{
             background: "none",
@@ -18,7 +17,6 @@ export function NotificationDetailPage({ notification, onBack }) {
         >
           ← Назад
         </button>
-
         <div
           style={{
             background: "#fff",
@@ -34,9 +32,8 @@ export function NotificationDetailPage({ notification, onBack }) {
     );
   }
 
-  function formatDateTime(isoDate) {
+  const formatDateTime = (isoDate) => {
     if (!isoDate) return "—";
-
     return new Date(isoDate).toLocaleString("ru-RU", {
       day: "numeric",
       month: "long",
@@ -44,23 +41,11 @@ export function NotificationDetailPage({ notification, onBack }) {
       hour: "2-digit",
       minute: "2-digit",
     });
-  }
-
-  function getTypeLabel(type) {
-    const types = {
-      event_approved: "Мероприятие одобрено",
-      achievement_received: "Достижение",
-      currency_reward: "Начисление валюты",
-      event_moderation: "Модерация мероприятия",
-    };
-
-    return types[type] || type || "Уведомление";
-  }
+  };
 
   return (
     <div>
       <button
-        type="button"
         onClick={onBack}
         style={{
           background: "none",
@@ -73,7 +58,6 @@ export function NotificationDetailPage({ notification, onBack }) {
       >
         ← Назад к мероприятиям
       </button>
-
 
       <section
         style={{
@@ -108,7 +92,6 @@ export function NotificationDetailPage({ notification, onBack }) {
             >
               {notification.is_read ? "Прочитано" : "Новое"}
             </div>
-
             <h2
               style={{
                 fontSize: 22,
@@ -117,10 +100,9 @@ export function NotificationDetailPage({ notification, onBack }) {
                 margin: 0,
               }}
             >
-              {notification.title}
+              Уведомление
             </h2>
           </div>
-
           <div
             style={{
               fontSize: 13,
@@ -137,80 +119,23 @@ export function NotificationDetailPage({ notification, onBack }) {
           style={{
             border: "1px solid #E5E7EB",
             borderRadius: 12,
-            overflow: "hidden",
+            padding: 18,
+            background: "#F9FAFB",
             marginBottom: 24,
           }}
         >
-          <InfoRow label="Тип" value={getTypeLabel(notification.type)} />
-          <InfoRow label="От кого" value={notification.sender_name || "—"} />
-          <InfoRow label="Email отправителя" value={notification.sender_email || "—"} />
-          <InfoRow label="Кому" value={notification.recipient_name || "—"} />
-          <InfoRow label="Email получателя" value={notification.recipient_email || "—"} />
-          <InfoRow label="Когда" value={formatDateTime(notification.created_at)} />
-        </div>
-
-        <div>
-          <h3
-            style={{
-              fontSize: 16,
-              fontWeight: 700,
-              color: "#111827",
-              margin: "0 0 10px",
-            }}
-          >
-            Сообщение
-          </h3>
-
           <div
             style={{
-              background: "#F9FAFB",
-              border: "1px solid #E5E7EB",
-              borderRadius: 12,
-              padding: 18,
               fontSize: 14,
               color: "#374151",
               lineHeight: 1.6,
               whiteSpace: "pre-line",
             }}
           >
-            {notification.full_text || notification.message}
+            {notification.message}
           </div>
         </div>
       </section>
-    </div>
-  );
-}
-
-function InfoRow({ label, value }) {
-  return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "180px 1fr",
-        borderBottom: "1px solid #F3F4F6",
-      }}
-    >
-      <div
-        style={{
-          background: "#F9FAFB",
-          padding: "12px 14px",
-          fontSize: 13,
-          color: "#6B7280",
-          fontWeight: 500,
-        }}
-      >
-        {label}
-      </div>
-
-      <div
-        style={{
-          padding: "12px 14px",
-          fontSize: 13,
-          color: "#111827",
-        }}
-      >
-        {value}
-      </div>
     </div>
   );
 }

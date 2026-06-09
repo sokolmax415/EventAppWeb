@@ -10,6 +10,20 @@ export default function ProfilePage({ currentUser, events = [], onUpdateProfile 
   });
   const [errors, setErrors] = useState({});
 
+  const [participatingEvents, setParticipatingEvents] = useState([]);
+  const [createdEvents, setCreatedEvents] = useState([]);
+
+  useEffect(() => {
+    // Загрузка мероприятий с участием
+    api.getMyEvents()
+      .then(data => setParticipatingEvents(data.events || []))
+      .catch(err => console.error(err));
+    // Загрузка созданных мероприятий
+    api.getMyCreatedEvents()
+      .then(data => setCreatedEvents(data.events || []))
+      .catch(err => console.error(err));
+  }, []);
+
   // Загрузка достижений
   useEffect(() => {
     api.getAchievements()
@@ -17,10 +31,6 @@ export default function ProfilePage({ currentUser, events = [], onUpdateProfile 
       .catch(err => console.error("Ошибка загрузки достижений", err));
   }, []);
 
-  // Фильтрация событий для раздела "Участвую" (где my_participation_status не null)
-  const participatingEvents = events.filter(event => event.my_participation_status);
-  // События, созданные текущим пользователем
-  const createdEvents = events.filter(event => event.is_creator);
 
   const getRoleLabel = (role) => role === "admin" ? "Администратор" : "Студент";
 
@@ -208,10 +218,10 @@ export default function ProfilePage({ currentUser, events = [], onUpdateProfile 
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {participatingEvents.map(ev => (
-                <div key={ev.id} style={{ border: "1px solid #E5E7EB", borderRadius: 12, padding: 14, background: "#F9FAFB" }}>
+                <div key={ev.event_id} style={{ border: "1px solid #E5E7EB", borderRadius: 12, padding: 14, background: "#F9FAFB" }}>
                   <h3 style={{ fontSize: 15, fontWeight: 600, color: "#111827", margin: "0 0 6px" }}>{ev.title}</h3>
-                  <p style={{ fontSize: 13, color: "#6B7280", margin: "0 0 6px" }}>Дата: {formatDate(ev.start_time)}</p>
-                  <p style={{ fontSize: 13, color: "#374151", margin: 0 }}>Статус: {getParticipationStatusLabel(ev.my_participation_status)}</p>
+                  <p style={{ fontSize: 13, color: "#6B7280", margin: "0 0 6px" }}>Статус события: {getEventStatusLabel(ev.status)}</p>
+                  <p style={{ fontSize: 13, color: "#374151", margin: 0 }}>Ваш статус: {getParticipationStatusLabel(ev.participation_status)}</p>
                 </div>
               ))}
             </div>
@@ -226,9 +236,9 @@ export default function ProfilePage({ currentUser, events = [], onUpdateProfile 
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {createdEvents.map(ev => (
-                <div key={ev.id} style={{ border: "1px solid #E5E7EB", borderRadius: 12, padding: 14, background: "#F9FAFB" }}>
+                <div key={ev.event_id} style={{ border: "1px solid #E5E7EB", borderRadius: 12, padding: 14, background: "#F9FAFB" }}>
                   <h3 style={{ fontSize: 15, fontWeight: 600, color: "#111827", margin: "0 0 6px" }}>{ev.title}</h3>
-                  <p style={{ fontSize: 13, color: "#6B7280", margin: "0 0 6px" }}>Создано: {formatDate(ev.created_at || ev.start_time)}</p>
+                  <p style={{ fontSize: 13, color: "#6B7280", margin: "0 0 6px" }}>Создано: {new Date(ev.created_at).toLocaleDateString()}</p>
                   <p style={{ fontSize: 13, color: "#374151", margin: 0 }}>Статус: {getEventStatusLabel(ev.status)}</p>
                 </div>
               ))}

@@ -43,7 +43,6 @@ export function EventsList({ events, role, onEventClick, onCreateClick }) {
 
       {visible.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-icon">📭</div>
           <p className="empty-text">Нет доступных мероприятий</p>
         </div>
       ) : (

@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { PART_MSG, STATUS } from "../../constants/events.js";
-import { fmtDate } from "../../utils/date.js";
 import { Btn } from "../ui/Button.jsx";
 import { Badge } from "../ui/Badges.jsx";
 import { ConfirmDialog } from "../ui/ConfirmDialog.jsx";
 import { AttendancePanel } from "./AttendancePanel.jsx";
+import { fmtDate, utcToLocalDatetime, localToUTC } from "../../utils/date.js";
 
 export function EventDetail({ event, role,currentUser, categories, onBack, onUpdate, onDelete, onApprove, onReject, onConfirmAttendance,onRegister,onPlan,onCancelParticipation }) {
   const isAdmin = role === "admin";
@@ -20,8 +20,8 @@ export function EventDetail({ event, role,currentUser, categories, onBack, onUpd
   title: event.title,
   description: event.description,
   location: event.location,
-  start_time: event.start_time.slice(0, 16),
-  end_time: event.end_time.slice(0, 16),
+  start_time: utcToLocalDatetime(event.start_time),
+  end_time: utcToLocalDatetime(event.end_time),
   max_participants: String(event.max_participants),
   category_id: event.category.id,
 });
@@ -57,8 +57,8 @@ export function EventDetail({ event, role,currentUser, categories, onBack, onUpd
       title: ed.title,
       description: ed.description,
       location: ed.location,
-      start_time: ed.start_time + ":00Z",
-      end_time: ed.end_time + ":00Z",
+      start_time: localToUTC(ed.start_time),
+      end_time: localToUTC(ed.end_time),
       max_participants: nextMaxParticipants,
       category_id: ed.category_id,
     });
@@ -230,8 +230,8 @@ export function EventDetail({ event, role,currentUser, categories, onBack, onUpd
                         <Btn variant="dangerSolid" onClick={requestReject}>Отклонить</Btn>
                       </>
                     )}
-                    {canAdminEdit && <Btn variant="primary" onClick={() => setEditing(true)}>✏️ Редактировать</Btn>}
-                    <Btn variant="danger" onClick={requestDelete}>🗑 Удалить мероприятие</Btn>
+                    {canAdminEdit && !event.is_finished && ( <Btn variant="primary" onClick={() => setEditing(true)}>✏️ Редактировать</Btn>)}
+                    {!event.is_finished && (<Btn variant="danger" onClick={requestDelete}>Удалить мероприятие</Btn>)}
                   </>
                 )}
               </div>

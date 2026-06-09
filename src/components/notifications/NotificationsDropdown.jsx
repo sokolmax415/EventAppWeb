@@ -1,30 +1,24 @@
 import React, { useState } from "react";
 
-export function NotificationsDropdown({
-  notifications = [],
-  onNotificationClick,
-}) {
+export function NotificationsDropdown({ notifications = [], onNotificationClick }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const unreadCount = notifications.filter(
-    (notification) => !notification.is_read
-  ).length;
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
 
-  function formatDate(isoDate) {
+  const formatDate = (isoDate) => {
     if (!isoDate) return "—";
-
     return new Date(isoDate).toLocaleDateString("ru-RU", {
       day: "numeric",
       month: "short",
       hour: "2-digit",
       minute: "2-digit",
     });
-  }
+  };
 
-  function handleNotificationClick(notification) {
+  const handleNotificationClick = (notification) => {
     setIsOpen(false);
     onNotificationClick(notification.id);
-  }
+  };
 
   return (
     <div style={{ position: "relative" }}>
@@ -47,7 +41,6 @@ export function NotificationsDropdown({
         aria-label="Уведомления"
       >
         🔔
-
         {unreadCount > 0 && (
           <span
             style={{
@@ -99,49 +92,21 @@ export function NotificationsDropdown({
             }}
           >
             <div>
-              <h3
-                style={{
-                  margin: 0,
-                  fontSize: 16,
-                  fontWeight: 700,
-                  color: "#111827",
-                }}
-              >
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#111827" }}>
                 Уведомления
               </h3>
-
-              <p
-                style={{
-                  margin: "4px 0 0",
-                  fontSize: 12,
-                  color: "#6B7280",
-                }}
-              >
-                {unreadCount > 0
-                  ? `Непрочитанных: ${unreadCount}`
-                  : "Нет новых уведомлений"}
+              <p style={{ margin: "4px 0 0", fontSize: 12, color: "#6B7280" }}>
+                {unreadCount > 0 ? `Непрочитанных: ${unreadCount}` : "Нет новых уведомлений"}
               </p>
             </div>
           </div>
 
           {notifications.length === 0 ? (
-            <div
-              style={{
-                padding: 24,
-                textAlign: "center",
-                color: "#9CA3AF",
-                fontSize: 14,
-              }}
-            >
+            <div style={{ padding: 24, textAlign: "center", color: "#9CA3AF", fontSize: 14 }}>
               Уведомлений пока нет
             </div>
           ) : (
-            <div
-              style={{
-                maxHeight: 360,
-                overflowY: "auto",
-              }}
-            >
+            <div style={{ maxHeight: 360, overflowY: "auto" }}>
               {notifications.map((notification) => (
                 <button
                   key={notification.id}
@@ -169,7 +134,6 @@ export function NotificationsDropdown({
                       flexShrink: 0,
                     }}
                   />
-
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div
                       style={{
@@ -179,9 +143,8 @@ export function NotificationsDropdown({
                         marginBottom: 4,
                       }}
                     >
-                      {notification.title}
+                      Уведомление
                     </div>
-
                     <div
                       style={{
                         fontSize: 13,
@@ -192,13 +155,7 @@ export function NotificationsDropdown({
                     >
                       {notification.message}
                     </div>
-
-                    <div
-                      style={{
-                        fontSize: 12,
-                        color: "#9CA3AF",
-                      }}
-                    >
+                    <div style={{ fontSize: 12, color: "#9CA3AF" }}>
                       {formatDate(notification.created_at)}
                     </div>
                   </div>

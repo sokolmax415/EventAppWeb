@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { getMinDateTimeLocal } from "../../utils/date.js";
+import { getMinDateTimeLocal, localToUTC } from "../../utils/date.js";
 import { Btn } from "../ui/Button.jsx";
 
 export function CreateEventForm({ role, currentUser, categories = [], onSubmit, onCancel }) {
@@ -8,7 +8,7 @@ export function CreateEventForm({ role, currentUser, categories = [], onSubmit, 
   const [form, setForm] = useState({
     title: "",
     description: "",
-    category_id: "",          // ← храним ID категории
+    category_id: "",   
     location: "",
     start_time: "",
     end_time: "",
@@ -49,15 +49,17 @@ export function CreateEventForm({ role, currentUser, categories = [], onSubmit, 
       setErrors(e);
       return;
     }
+    const startUTC = localToUTC(form.start_time);
+    const endUTC = localToUTC(form.end_time);
     // Выбираем название категории для отображения (не обязательно для API)
     const selectedCategory = categories.find(cat => cat.id === form.category_id);
     onSubmit({
-      category_id: form.category_id,          // ← отправляем ID
+      category_id: form.category_id,
       title: form.title.trim(),
       description: form.description.trim(),
       location: form.location.trim(),
-      start_time: form.start_time + ":00Z",
-      end_time: form.end_time + ":00Z",
+      start_time: startUTC,
+      end_time: endUTC,
       max_participants: Number(form.max_participants),
       // Ниже поля, которые могут быть нужны для временного отображения в UI (но бэкенд их перезапишет)
       // Они не обязательны для API, но могут использоваться в локальном состоянии.
@@ -72,7 +74,7 @@ export function CreateEventForm({ role, currentUser, categories = [], onSubmit, 
       participants: [],
     });
   }
-  
+
   function field(key, label, el) {
     return (
       <div className="form-field">

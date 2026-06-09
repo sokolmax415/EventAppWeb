@@ -26,7 +26,7 @@ export default function App() {
   const role = user?.role;
 
   const selectedNotification = notifications.find((n) => n.id === selectedNotificationId);
-  const currentUserNotifications = notifications.filter((n) => n.user_id === user?.user_id);
+
 
   const showToast = (message) => {
     const id = Date.now() + Math.random();
@@ -47,6 +47,7 @@ export default function App() {
   const loadNotifications = async () => {
     try {
       const data = await api.getNotifications();
+      console.log("Raw notifications response:", data);
       setNotifications(data.notifications || []);
     } catch (err) {
       console.warn(err);
@@ -86,6 +87,10 @@ export default function App() {
       loadCategories();
     }
   }, [user]);
+
+  useEffect(() => {
+  console.log("Current notifications state:", notifications);
+}, [notifications]);
 
   // Обработчики действий (API)
   const handleCreate = async (eventData) => {
@@ -254,7 +259,6 @@ const handleUpdateProfile = async (updatedProfile) => {
       <header className="app-header">
         <div className="header-left">
           <div className="brand">
-            <span className="brand-icon">🗓</span>
             <span className="brand-name">EventHub</span>
           </div>
           <div className="header-divider" />
@@ -283,7 +287,7 @@ const handleUpdateProfile = async (updatedProfile) => {
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <NotificationsDropdown
-            notifications={currentUserNotifications}
+            notifications={notifications}
             onNotificationClick={handleOpenNotification}
           />
           <button
@@ -292,7 +296,11 @@ const handleUpdateProfile = async (updatedProfile) => {
             onClick={openProfile}
             style={{ border: "none", background: "transparent", cursor: "pointer" }}
           >
-            <div className="avatar">{role === "admin" ? "A" : "АИ"}</div>
+            <div className="avatar">
+            {user.name 
+              ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2)
+              : (user.email ? user.email[0].toUpperCase() : "U")}
+            </div>
             <span className="user-name">{user.name}</span>
             <span className="role-pill">{role === "admin" ? "admin" : "student"}</span>
           </button>
