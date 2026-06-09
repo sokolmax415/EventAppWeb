@@ -28,7 +28,6 @@ export function LoginPage() {
     <div className="login-page">
       <div className="login-card">
         <div className="login-header">
-          <span className="brand-icon">🗓</span>
           <span className="brand-name">EventHub</span>
         </div>
         <h2>{isSignUp ? 'Создать аккаунт' : 'Вход в систему'}</h2>

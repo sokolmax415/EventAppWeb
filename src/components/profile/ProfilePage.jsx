@@ -1,799 +1,235 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { api } from "../../services/api";
 
-export default function ProfilePage({
-  currentUser,
-  events = [],
-  achievements = [],
-  onUpdateProfile,
-}) {
-  const nameParts = (currentUser?.name || "Иванов Алексей").split(" ");
-
-  const user = {
-    user_id: currentUser?.user_id || currentUser?.id || "user-student",
-    first_name: currentUser?.first_name || nameParts[1] || "Алексей",
-    last_name: currentUser?.last_name || nameParts[0] || "Иванов",
-    patronymic: currentUser?.patronymic || "",
-    email: currentUser?.email || "user@example.com",
-    role: currentUser?.role || "student",
-    description: currentUser?.description || "Люблю хакатоны",
-    balance: currentUser?.balance ?? 150,
-  };
-
-  const profileFullName = [user.last_name, user.first_name, user.patronymic]
-    .filter(Boolean)
-    .join(" ");
-
+export default function ProfilePage({ currentUser, events = [], onUpdateProfile }) {
+  const [achievements, setAchievements] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
-
   const [profileForm, setProfileForm] = useState({
-    first_name: user.first_name,
-    last_name: user.last_name,
-    patronymic: user.patronymic,
-    description: user.description,
+    name: currentUser?.name || "",
+    description: currentUser?.description || "",
   });
-
   const [errors, setErrors] = useState({});
 
-  const userAchievements = achievements.filter(
-    (achievement) => achievement.user_id === user.user_id
-  );
+  // Загрузка достижений
+  useEffect(() => {
+    api.getAchievements()
+      .then(data => setAchievements(data.achievements || []))
+      .catch(err => console.error("Ошибка загрузки достижений", err));
+  }, []);
 
-  const participatingEvents = events.filter((event) => {
-    return Boolean(event.my_participation_status);
-  });
+  // Фильтрация событий для раздела "Участвую" (где my_participation_status не null)
+  const participatingEvents = events.filter(event => event.my_participation_status);
+  // События, созданные текущим пользователем
+  const createdEvents = events.filter(event => event.is_creator);
 
-  const createdEvents = events.filter((event) => {
-    return event.is_creator || event.creator?.id === user.user_id;
-  });
+  const getRoleLabel = (role) => role === "admin" ? "Администратор" : "Студент";
 
-  function formatDate(isoDate) {
+  const formatDate = (isoDate) => {
     if (!isoDate) return "—";
-
     return new Date(isoDate).toLocaleDateString("ru-RU", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
+      day: "numeric", month: "long", year: "numeric"
     });
-  }
+  };
 
-  function getRoleLabel(role) {
-    if (role === "admin") return "Администратор";
-    return "Студент";
-  }
+  const getParticipationStatusLabel = (status) => {
+    const labels = { planned: "Планирую посетить", registered: "Записан", attended: "Посетил" };
+    return labels[status] || status;
+  };
 
-  function getParticipationStatusLabel(status) {
-    const statuses = {
-      planned: "Планирую посетить",
-      registered: "Записан",
-      attended: "Посетил",
-    };
+  const getEventStatusLabel = (status) => {
+    const labels = { pending: "На модерации", approved: "Одобрено", rejected: "Отклонено", cancelled: "Отменено" };
+    return labels[status] || status;
+  };
 
-    return statuses[status] || status;
-  }
+  const handleChange = (field, value) => {
+    setProfileForm(prev => ({ ...prev, [field]: value }));
+    setErrors(prev => ({ ...prev, [field]: "" }));
+  };
 
-  function getEventStatusLabel(status) {
-    const statuses = {
-      pending: "На модерации",
-      approved: "Одобрено",
-      rejected: "Отклонено",
-      cancelled: "Отменено",
-    };
-
-    return statuses[status] || status;
-  }
-
-  function handleChange(field, value) {
-    setProfileForm((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-
-    setErrors((prev) => ({
-      ...prev,
-      [field]: "",
-    }));
-  }
-
-  function handleEdit() {
+  const handleEdit = () => {
     setProfileForm({
-      first_name: user.first_name,
-      last_name: user.last_name,
-      patronymic: user.patronymic,
-      description: user.description,
+      name: currentUser.name || "",
+      description: currentUser.description || "",
     });
-
     setErrors({});
     setIsEditing(true);
-  }
+  };
 
-  function handleCancel() {
+  const handleCancel = () => {
     setProfileForm({
-      first_name: user.first_name,
-      last_name: user.last_name,
-      patronymic: user.patronymic,
-      description: user.description,
+      name: currentUser.name || "",
+      description: currentUser.description || "",
     });
-
     setErrors({});
     setIsEditing(false);
-  }
+  };
 
-  function isOnlyLetters(value) {
-    return /^[A-Za-zА-Яа-яЁё]+$/.test(value);
-  }
+  const handleSubmit = async () => {
+    const newErrors = {};
+    const name = profileForm.name.trim();
+    const description = profileForm.description.trim();
 
-  function handleSubmit() {
-    const nextErrors = {};
+    if (!name) newErrors.name = "Укажите имя";
+    else if (name.length > 100) newErrors.name = "Имя не должно быть длиннее 100 символов";
 
-    const firstName = profileForm.first_name.trim();
-    const lastName = profileForm.last_name.trim();
-    const patronymic = profileForm.patronymic.trim();
+    if (description.length > 300) newErrors.description = "Описание не должно быть длиннее 300 символов";
 
-    if (!lastName) {
-      nextErrors.last_name = "Укажите фамилию";
-    } else if (!isOnlyLetters(lastName)) {
-      nextErrors.last_name = "Фамилия может содержать только буквы";
-    } else if (lastName.length > 80) {
-      nextErrors.last_name = "Фамилия не должна быть длиннее 80 символов";
-    }
-
-    if (!firstName) {
-      nextErrors.first_name = "Укажите имя";
-    } else if (!isOnlyLetters(firstName)) {
-      nextErrors.first_name = "Имя может содержать только буквы";
-    } else if (firstName.length > 80) {
-      nextErrors.first_name = "Имя не должно быть длиннее 80 символов";
-    }
-
-    if (patronymic && !isOnlyLetters(patronymic)) {
-      nextErrors.patronymic = "Отчество может содержать только буквы";
-    } else if (patronymic.length > 80) {
-      nextErrors.patronymic = "Отчество не должно быть длиннее 80 символов";
-    }
-
-    if (profileForm.description.trim().length > 300) {
-      nextErrors.description = "Описание не должно быть длиннее 300 символов";
-    }
-
-    if (Object.keys(nextErrors).length > 0) {
-      setErrors(nextErrors);
+    if (Object.keys(newErrors).length) {
+      setErrors(newErrors);
       return;
     }
 
-    onUpdateProfile({
-      first_name: firstName,
-      last_name: lastName,
-      patronymic,
-      name: `${lastName} ${firstName}`,
-      description: profileForm.description.trim(),
-    });
-
+    await onUpdateProfile({ name, description });
     setIsEditing(false);
-  }
+  };
 
   return (
     <div>
       <div style={{ marginBottom: 24 }}>
-        <h1
-          style={{
-            fontSize: 24,
-            fontWeight: 700,
-            color: "#111827",
-            margin: "0 0 6px",
-          }}
-        >
+        <h1 style={{ fontSize: 24, fontWeight: 700, color: "#111827", margin: "0 0 6px" }}>
           Профиль
         </h1>
-
-        <p
-          style={{
-            fontSize: 14,
-            color: "#6B7280",
-            margin: 0,
-          }}
-        >
+        <p style={{ fontSize: 14, color: "#6B7280", margin: 0 }}>
           Основная информация и активность пользователя
         </p>
       </div>
 
-      <section
-        style={{
-          background: "#fff",
-          border: "1px solid #E5E7EB",
-          borderRadius: 14,
-          padding: 24,
-          marginBottom: 24,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "flex-start",
-            gap: 16,
-          }}
-        >
-          <div
-            style={{
-              width: 56,
-              height: 56,
-              borderRadius: "50%",
-              background: "#EEF2FF",
-              color: "#4F46E5",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 18,
-              fontWeight: 700,
-              flexShrink: 0,
-            }}
-          >
-            {user.role === "admin" ? "A" : "АИ"}
+      {/* Карточка профиля */}
+      <section style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 14, padding: 24, marginBottom: 24 }}>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
+          <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#EEF2FF", color: "#4F46E5",
+                        display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 700 }}>
+            {currentUser.role === "admin" ? "A" : currentUser.name?.charAt(0)?.toUpperCase() || "U"}
           </div>
-
           <div style={{ flex: 1 }}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-                gap: 16,
-                marginBottom: isEditing ? 14 : 0,
-              }}
-            >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, marginBottom: isEditing ? 14 : 0 }}>
               <div style={{ flex: 1 }}>
                 {isEditing ? (
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(3, 1fr)",
-                      gap: 12,
-                      marginBottom: 10,
-                    }}
-                  >
-                    <div>
-                      <label
-                        style={{
-                          display: "block",
-                          fontSize: 13,
-                          fontWeight: 500,
-                          color: "#4B5563",
-                          marginBottom: 4,
-                        }}
-                      >
-                        Фамилия *
-                      </label>
-
-                      <input
-                        value={profileForm.last_name}
-                        onChange={(event) =>
-                          handleChange("last_name", event.target.value)
-                        }
-                        placeholder="Фамилия"
-                        style={{
-                          width: "100%",
-                          border: `1px solid ${
-                            errors.last_name ? "#FCA5A5" : "#D1D5DB"
-                          }`,
-                          borderRadius: 8,
-                          padding: "8px 12px",
-                          fontSize: 14,
-                          color: "#111827",
-                          outline: "none",
-                          boxSizing: "border-box",
-                        }}
-                      />
-
-                      {errors.last_name && (
-                        <div
-                          style={{
-                            fontSize: 12,
-                            color: "#DC2626",
-                            marginTop: 4,
-                          }}
-                        >
-                          {errors.last_name}
-                        </div>
-                      )}
-                    </div>
-
-                    <div>
-                      <label
-                        style={{
-                          display: "block",
-                          fontSize: 13,
-                          fontWeight: 500,
-                          color: "#4B5563",
-                          marginBottom: 4,
-                        }}
-                      >
+                  <>
+                    <div style={{ marginBottom: 12 }}>
+                      <label style={{ display: "block", fontSize: 13, fontWeight: 500, color: "#4B5563", marginBottom: 4 }}>
                         Имя *
                       </label>
-
                       <input
-                        value={profileForm.first_name}
-                        onChange={(event) =>
-                          handleChange("first_name", event.target.value)
-                        }
-                        placeholder="Имя"
+                        value={profileForm.name}
+                        onChange={e => handleChange("name", e.target.value)}
                         style={{
                           width: "100%",
-                          border: `1px solid ${
-                            errors.first_name ? "#FCA5A5" : "#D1D5DB"
-                          }`,
+                          border: `1px solid ${errors.name ? "#FCA5A5" : "#D1D5DB"}`,
                           borderRadius: 8,
                           padding: "8px 12px",
                           fontSize: 14,
-                          color: "#111827",
-                          outline: "none",
-                          boxSizing: "border-box",
                         }}
                       />
-
-                      {errors.first_name && (
-                        <div
-                          style={{
-                            fontSize: 12,
-                            color: "#DC2626",
-                            marginTop: 4,
-                          }}
-                        >
-                          {errors.first_name}
-                        </div>
-                      )}
+                      {errors.name && <div style={{ fontSize: 12, color: "#DC2626", marginTop: 4 }}>{errors.name}</div>}
                     </div>
-
-                    <div>
-                      <label
-                        style={{
-                          display: "block",
-                          fontSize: 13,
-                          fontWeight: 500,
-                          color: "#4B5563",
-                          marginBottom: 4,
-                        }}
-                      >
-                        Отчество
-                      </label>
-
-                      <input
-                        value={profileForm.patronymic}
-                        onChange={(event) =>
-                          handleChange("patronymic", event.target.value)
-                        }
-                        placeholder="Отчество"
-                        style={{
-                          width: "100%",
-                          border: `1px solid ${
-                            errors.patronymic ? "#FCA5A5" : "#D1D5DB"
-                          }`,
-                          borderRadius: 8,
-                          padding: "8px 12px",
-                          fontSize: 14,
-                          color: "#111827",
-                          outline: "none",
-                          boxSizing: "border-box",
-                        }}
-                      />
-
-                      {errors.patronymic && (
-                        <div
-                          style={{
-                            fontSize: 12,
-                            color: "#DC2626",
-                            marginTop: 4,
-                          }}
-                        >
-                          {errors.patronymic}
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  </>
                 ) : (
-                  <h2
-                    style={{
-                      fontSize: 20,
-                      fontWeight: 700,
-                      color: "#111827",
-                      margin: "0 0 4px",
-                    }}
-                  >
-                    {profileFullName}
+                  <h2 style={{ fontSize: 20, fontWeight: 700, color: "#111827", margin: "0 0 4px" }}>
+                    {currentUser.name || "Пользователь"}
                   </h2>
                 )}
-
-                <p
-                  style={{
-                    fontSize: 14,
-                    color: "#6B7280",
-                    margin: "0 0 10px",
-                  }}
-                >
-                  {user.email}
-                </p>
-
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 8,
-                    flexWrap: "wrap",
-                    marginBottom: 14,
-                  }}
-                >
-                  <span
-                    style={{
-                      background: "#F3F4F6",
-                      color: "#374151",
-                      borderRadius: 20,
-                      padding: "4px 10px",
-                      fontSize: 12,
-                      fontWeight: 600,
-                    }}
-                  >
-                    {getRoleLabel(user.role)}
+                <p style={{ fontSize: 14, color: "#6B7280", margin: "0 0 10px" }}>{currentUser.email}</p>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
+                  <span style={{ background: "#F3F4F6", color: "#374151", borderRadius: 20, padding: "4px 10px", fontSize: 12, fontWeight: 600 }}>
+                    {getRoleLabel(currentUser.role)}
                   </span>
-
-                  <span
-                    style={{
-                      background: "#ECFDF5",
-                      color: "#047857",
-                      borderRadius: 20,
-                      padding: "4px 10px",
-                      fontSize: 12,
-                      fontWeight: 600,
-                    }}
-                  >
-                    Баланс: {user.balance}
+                  <span style={{ background: "#ECFDF5", color: "#047857", borderRadius: 20, padding: "4px 10px", fontSize: 12, fontWeight: 600 }}>
+                    Баланс: {currentUser.balance ?? 0}
                   </span>
                 </div>
               </div>
-
               {!isEditing && (
-                <button
-                  type="button"
-                  onClick={handleEdit}
-                  style={{
-                    border: "1px solid #D1D5DB",
-                    background: "#fff",
-                    color: "#374151",
-                    borderRadius: 8,
-                    padding: "8px 14px",
-                    fontSize: 13,
-                    fontWeight: 500,
-                    cursor: "pointer",
-                    whiteSpace: "nowrap",
-                  }}
-                >
+                <button onClick={handleEdit} style={{ border: "1px solid #D1D5DB", background: "#fff", color: "#374151",
+                  borderRadius: 8, padding: "8px 14px", fontSize: 13, cursor: "pointer" }}>
                   Редактировать
                 </button>
               )}
             </div>
-
             {isEditing ? (
               <div>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: 13,
-                    fontWeight: 500,
-                    color: "#4B5563",
-                    marginBottom: 4,
-                  }}
-                >
+                <label style={{ display: "block", fontSize: 13, fontWeight: 500, color: "#4B5563", marginBottom: 4 }}>
                   Описание
                 </label>
-
                 <textarea
                   value={profileForm.description}
-                  onChange={(event) =>
-                    handleChange("description", event.target.value)
-                  }
-                  placeholder="Расскажите о себе"
+                  onChange={e => handleChange("description", e.target.value)}
                   rows={4}
-                  style={{
-                    width: "100%",
-                    border: `1px solid ${
-                      errors.description ? "#FCA5A5" : "#D1D5DB"
-                    }`,
-                    borderRadius: 8,
-                    padding: "8px 12px",
-                    fontSize: 14,
-                    color: "#111827",
-                    outline: "none",
-                    resize: "vertical",
-                    boxSizing: "border-box",
-                  }}
+                  style={{ width: "100%", border: `1px solid ${errors.description ? "#FCA5A5" : "#D1D5DB"}`, borderRadius: 8,
+                           padding: "8px 12px", fontSize: 14, resize: "vertical" }}
                 />
-
-                {errors.description && (
-                  <div
-                    style={{
-                      fontSize: 12,
-                      color: "#DC2626",
-                      marginTop: 4,
-                    }}
-                  >
-                    {errors.description}
-                  </div>
-                )}
-
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 10,
-                    marginTop: 14,
-                  }}
-                >
-                  <button
-                    type="button"
-                    onClick={handleSubmit}
-                    style={{
-                      border: "1px solid #0F172A",
-                      background: "#0F172A",
-                      color: "#fff",
-                      borderRadius: 8,
-                      padding: "8px 16px",
-                      fontSize: 13,
-                      fontWeight: 500,
-                      cursor: "pointer",
-                    }}
-                  >
+                {errors.description && <div style={{ fontSize: 12, color: "#DC2626", marginTop: 4 }}>{errors.description}</div>}
+                <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
+                  <button onClick={handleSubmit} style={{ border: "1px solid #0F172A", background: "#0F172A", color: "#fff",
+                    borderRadius: 8, padding: "8px 16px", fontSize: 13, cursor: "pointer" }}>
                     Сохранить
                   </button>
-
-                  <button
-                    type="button"
-                    onClick={handleCancel}
-                    style={{
-                      border: "1px solid #D1D5DB",
-                      background: "#fff",
-                      color: "#374151",
-                      borderRadius: 8,
-                      padding: "8px 16px",
-                      fontSize: 13,
-                      fontWeight: 500,
-                      cursor: "pointer",
-                    }}
-                  >
+                  <button onClick={handleCancel} style={{ border: "1px solid #D1D5DB", background: "#fff", color: "#374151",
+                    borderRadius: 8, padding: "8px 16px", fontSize: 13, cursor: "pointer" }}>
                     Отмена
                   </button>
                 </div>
               </div>
             ) : (
-              <p
-                style={{
-                  fontSize: 14,
-                  color: "#374151",
-                  lineHeight: 1.5,
-                  margin: 0,
-                }}
-              >
-                {user.description || "Описание пока не заполнено"}
+              <p style={{ fontSize: 14, color: "#374151", margin: 0 }}>
+                {currentUser.description || "Описание пока не заполнено"}
               </p>
             )}
           </div>
         </div>
       </section>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: 18,
-        }}
-      >
-        <section
-          style={{
-            background: "#fff",
-            border: "1px solid #E5E7EB",
-            borderRadius: 14,
-            padding: 20,
-          }}
-        >
-          <h2
-            style={{
-              fontSize: 18,
-              fontWeight: 700,
-              color: "#111827",
-              margin: "0 0 14px",
-            }}
-          >
-            Мои достижения
-          </h2>
-
-          {userAchievements.length === 0 ? (
+      {/* Три колонки с данными */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18 }}>
+        {/* Достижения */}
+        <section style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 14, padding: 20 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: "#111827", margin: "0 0 14px" }}>Мои достижения</h2>
+          {achievements.length === 0 ? (
             <EmptyText text="Достижений пока нет" />
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {userAchievements.map((achievement) => (
-                <div
-                  key={achievement.achievement_id}
-                  style={{
-                    border: "1px solid #E5E7EB",
-                    borderRadius: 12,
-                    padding: 14,
-                    background: "#F9FAFB",
-                  }}
-                >
-                  <h3
-                    style={{
-                      fontSize: 15,
-                      fontWeight: 600,
-                      color: "#111827",
-                      margin: "0 0 6px",
-                    }}
-                  >
-                    {achievement.title}
-                  </h3>
-
-                  <p
-                    style={{
-                      fontSize: 13,
-                      color: "#6B7280",
-                      margin: "0 0 8px",
-                      lineHeight: 1.4,
-                    }}
-                  >
-                    {achievement.description}
-                  </p>
-
-                  <p
-                    style={{
-                      fontSize: 12,
-                      color: "#374151",
-                      margin: "0 0 4px",
-                    }}
-                  >
-                    Награда: {achievement.reward_amount}
-                  </p>
-
-                  <p
-                    style={{
-                      fontSize: 12,
-                      color: "#9CA3AF",
-                      margin: 0,
-                    }}
-                  >
-                    Получено: {formatDate(achievement.awarded_at)}
-                  </p>
+              {achievements.map(ach => (
+                <div key={ach.achievement_id} style={{ border: "1px solid #E5E7EB", borderRadius: 12, padding: 14, background: "#F9FAFB" }}>
+                  <h3 style={{ fontSize: 15, fontWeight: 600, color: "#111827", margin: "0 0 6px" }}>{ach.title}</h3>
+                  <p style={{ fontSize: 13, color: "#6B7280", margin: "0 0 8px" }}>{ach.description}</p>
+                  <p style={{ fontSize: 12, color: "#374151", margin: "0 0 4px" }}>Награда: {ach.reward_amount}</p>
+                  <p style={{ fontSize: 12, color: "#9CA3AF", margin: 0 }}>Получено: {formatDate(ach.awarded_at)}</p>
                 </div>
               ))}
             </div>
           )}
         </section>
 
-        <section
-          style={{
-            background: "#fff",
-            border: "1px solid #E5E7EB",
-            borderRadius: 14,
-            padding: 20,
-          }}
-        >
-          <h2
-            style={{
-              fontSize: 18,
-              fontWeight: 700,
-              color: "#111827",
-              margin: "0 0 14px",
-            }}
-          >
-            Участвую
-          </h2>
-
+        {/* Участвую */}
+        <section style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 14, padding: 20 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: "#111827", margin: "0 0 14px" }}>Участвую</h2>
           {participatingEvents.length === 0 ? (
             <EmptyText text="Пока нет мероприятий с участием" />
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {participatingEvents.map((event) => (
-                <div
-                  key={event.id}
-                  style={{
-                    border: "1px solid #E5E7EB",
-                    borderRadius: 12,
-                    padding: 14,
-                    background: "#F9FAFB",
-                  }}
-                >
-                  <h3
-                    style={{
-                      fontSize: 15,
-                      fontWeight: 600,
-                      color: "#111827",
-                      margin: "0 0 6px",
-                    }}
-                  >
-                    {event.title}
-                  </h3>
-
-                  <p
-                    style={{
-                      fontSize: 13,
-                      color: "#6B7280",
-                      margin: "0 0 6px",
-                    }}
-                  >
-                    Дата: {formatDate(event.start_time)}
-                  </p>
-
-                  <p
-                    style={{
-                      fontSize: 13,
-                      color: "#374151",
-                      margin: 0,
-                    }}
-                  >
-                    Статус:{" "}
-                    {getParticipationStatusLabel(event.my_participation_status)}
-                  </p>
+              {participatingEvents.map(ev => (
+                <div key={ev.id} style={{ border: "1px solid #E5E7EB", borderRadius: 12, padding: 14, background: "#F9FAFB" }}>
+                  <h3 style={{ fontSize: 15, fontWeight: 600, color: "#111827", margin: "0 0 6px" }}>{ev.title}</h3>
+                  <p style={{ fontSize: 13, color: "#6B7280", margin: "0 0 6px" }}>Дата: {formatDate(ev.start_time)}</p>
+                  <p style={{ fontSize: 13, color: "#374151", margin: 0 }}>Статус: {getParticipationStatusLabel(ev.my_participation_status)}</p>
                 </div>
               ))}
             </div>
           )}
         </section>
 
-        <section
-          style={{
-            background: "#fff",
-            border: "1px solid #E5E7EB",
-            borderRadius: 14,
-            padding: 20,
-          }}
-        >
-          <h2
-            style={{
-              fontSize: 18,
-              fontWeight: 700,
-              color: "#111827",
-              margin: "0 0 14px",
-            }}
-          >
-            Мои мероприятия
-          </h2>
-
+        {/* Мои мероприятия (созданные) */}
+        <section style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 14, padding: 20 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: "#111827", margin: "0 0 14px" }}>Мои мероприятия</h2>
           {createdEvents.length === 0 ? (
             <EmptyText text="Пока нет созданных мероприятий" />
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {createdEvents.map((event) => (
-                <div
-                  key={event.id}
-                  style={{
-                    border: "1px solid #E5E7EB",
-                    borderRadius: 12,
-                    padding: 14,
-                    background: "#F9FAFB",
-                  }}
-                >
-                  <h3
-                    style={{
-                      fontSize: 15,
-                      fontWeight: 600,
-                      color: "#111827",
-                      margin: "0 0 6px",
-                    }}
-                  >
-                    {event.title}
-                  </h3>
-
-                  <p
-                    style={{
-                      fontSize: 13,
-                      color: "#6B7280",
-                      margin: "0 0 6px",
-                    }}
-                  >
-                    Создано: {formatDate(event.created_at || event.start_time)}
-                  </p>
-
-                  <p
-                    style={{
-                      fontSize: 13,
-                      color: "#374151",
-                      margin: 0,
-                    }}
-                  >
-                    Статус: {getEventStatusLabel(event.status)}
-                  </p>
+              {createdEvents.map(ev => (
+                <div key={ev.id} style={{ border: "1px solid #E5E7EB", borderRadius: 12, padding: 14, background: "#F9FAFB" }}>
+                  <h3 style={{ fontSize: 15, fontWeight: 600, color: "#111827", margin: "0 0 6px" }}>{ev.title}</h3>
+                  <p style={{ fontSize: 13, color: "#6B7280", margin: "0 0 6px" }}>Создано: {formatDate(ev.created_at || ev.start_time)}</p>
+                  <p style={{ fontSize: 13, color: "#374151", margin: 0 }}>Статус: {getEventStatusLabel(ev.status)}</p>
                 </div>
               ))}
             </div>
@@ -806,17 +242,8 @@ export default function ProfilePage({
 
 function EmptyText({ text }) {
   return (
-    <div
-      style={{
-        border: "1px dashed #D1D5DB",
-        borderRadius: 12,
-        padding: 18,
-        color: "#9CA3AF",
-        fontSize: 14,
-        textAlign: "center",
-        background: "#F9FAFB",
-      }}
-    >
+    <div style={{ border: "1px dashed #D1D5DB", borderRadius: 12, padding: 18, color: "#9CA3AF",
+                  fontSize: 14, textAlign: "center", background: "#F9FAFB" }}>
       {text}
     </div>
   );

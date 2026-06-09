@@ -64,8 +64,14 @@ export function AuthProvider({ children }) {
     return session?.access_token
   }
 
+  const refreshUser = async () => {
+    const token = await getToken();
+    if (token) {
+        await fetchMe(token);
+  }};
+
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, getToken }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, getToken,refreshUser }}>
       {children}
     </AuthContext.Provider>
   )

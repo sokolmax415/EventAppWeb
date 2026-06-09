@@ -12,7 +12,7 @@ import { NotificationDetailPage } from "./src/components/notifications/Notificat
 import { LoginPage } from "./src/components/LoginPage";
 
 export default function App() {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading, signOut, refreshUser } = useAuth();
   const [events, setEvents] = useState([]);
   const [users, setUsers] = useState([]);
   const [notifications, setNotifications] = useState([]);
@@ -99,14 +99,15 @@ export default function App() {
     }
   };
 
-  function handleUpdateProfile(updatedProfile) {
-  setCurrentUser((prev) => ({
-    ...prev,
-    ...updatedProfile,
-  }));
-
-  showToast("Профиль обновлён");
-}
+const handleUpdateProfile = async (updatedProfile) => {
+  try {
+    await api.updateProfile(updatedProfile);
+    await refreshUser(); 
+    showToast("Профиль обновлён");
+  } catch (err) {
+    showToast("Ошибка обновления профиля");
+  }
+};
 
   const handleUpdate = async (updatedEvent) => {
     try {
@@ -133,10 +134,11 @@ export default function App() {
   };
 
   const handleApprove = async (id) => {
-    const event = events.find((e) => e.id === id);
     try {
-      const updated = await api.approveEvent(id);
-      setEvents((prev) => prev.map((e) => (e.id === id ? updated : e)));
+      await api.approveEvent(id);
+      const updatedEvent = await api.getEvent(id);
+      setEvents(prev => prev.map(e => e.id === id ? updatedEvent : e));
+      if (selectedEvent?.id === id) setSelectedEvent(updatedEvent);
       if (event) showToast(`Мероприятие «${event.title}» одобрено`);
     } catch (err) {
       showToast("Ошибка одобрения");
@@ -147,7 +149,8 @@ export default function App() {
     const event = events.find((e) => e.id === id);
     try {
       const updated = await api.rejectEvent(id);
-      setEvents((prev) => prev.map((e) => (e.id === id ? updated : e)));
+      const updatedEvent = await api.getEvent(id);
+      setEvents(prev => prev.map(e => e.id === id ? updatedEvent : e));
       if (event) showToast(`Мероприятие «${event.title}» отклонено`);
     } catch (err) {
       showToast("Ошибка отклонения");
@@ -197,6 +200,43 @@ export default function App() {
     }
   };
 
+  const handleRegister = async (eventId) => {
+  try {
+    await api.setParticipation(eventId, "registered");
+    // обновляем событие в списке и выбранное событие
+    const updatedEvent = await api.getEvent(eventId);
+    setEvents(prev => prev.map(e => e.id === eventId ? updatedEvent : e));
+    if (selectedEvent?.id === eventId) setSelectedEvent(updatedEvent);
+    showToast("Вы записались на мероприятие");
+  } catch (err) {
+    showToast("Ошибка записи");
+  }
+  };
+
+  const handlePlan = async (eventId) => {
+    try {
+      await api.setParticipation(eventId, "planned");
+      const updatedEvent = await api.getEvent(eventId);
+      setEvents(prev => prev.map(e => e.id === eventId ? updatedEvent : e));
+      if (selectedEvent?.id === eventId) setSelectedEvent(updatedEvent);
+      showToast("Вы планируете посетить мероприятие");
+    } catch (err) {
+      showToast("Ошибка");
+    }
+  };
+
+  const handleCancelParticipation = async (eventId) => {
+    try {
+      await api.cancelParticipation(eventId);
+      const updatedEvent = await api.getEvent(eventId);
+      setEvents(prev => prev.map(e => e.id === eventId ? updatedEvent : e));
+      if (selectedEvent?.id === eventId) setSelectedEvent(updatedEvent);
+      showToast("Участие отменено");
+    } catch (err) {
+      showToast("Ошибка отмены");
+    }
+  };
+
   const handleOpenNotification = (notificationId) => {
     handleMarkNotificationRead(notificationId);
     setSelectedNotificationId(notificationId);
@@ -211,7 +251,6 @@ export default function App() {
 
   return (
     <div className="app">
-      {/* Демо-панель удалена */}
       <header className="app-header">
         <div className="header-left">
           <div className="brand">
@@ -284,6 +323,7 @@ export default function App() {
             currentUser={user}
             events={events}
             achievements={[]}  // Достижения загружаются внутри ProfilePage
+            onUpdateProfile={handleUpdateProfile}
           />
         )}
         {view === "notification-detail" && selectedNotification && (
@@ -304,6 +344,9 @@ export default function App() {
             onApprove={handleApprove}
             onReject={handleReject}
             onConfirmAttendance={handleConfirmAttendance}
+            onRegister={handleRegister}
+            onPlan={handlePlan}
+            onCancelParticipation={handleCancelParticipation}
           />
         )}
         {view === "create" && (

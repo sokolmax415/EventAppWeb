@@ -93,8 +93,8 @@ export function UsersList({ users, currentUserId, onRoleChange }) {
               {roleChangeDisabled && (
                 <div className="muted-note">
                   {isCurrentUser
-                    ? "Свою роль нельзя изменить в демо-режиме."
-                    : "Нельзя убрать последнего администратора."}
+                    ? "Свою роль нельзя изменить!"
+                    : "Нельзя убрать последнего администратора!"}
                 </div>
               )}
             </article>

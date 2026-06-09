@@ -6,7 +6,7 @@ import { Badge } from "../ui/Badges.jsx";
 import { ConfirmDialog } from "../ui/ConfirmDialog.jsx";
 import { AttendancePanel } from "./AttendancePanel.jsx";
 
-export function EventDetail({ event, role,currentUser, categories, onBack, onUpdate, onDelete, onApprove, onReject, onConfirmAttendance }) {
+export function EventDetail({ event, role,currentUser, categories, onBack, onUpdate, onDelete, onApprove, onReject, onConfirmAttendance,onRegister,onPlan,onCancelParticipation }) {
   const isAdmin = role === "admin";
   console.log(currentUser)
   const isCreator = event.creator?.id === currentUser?.user_id;
@@ -67,11 +67,12 @@ export function EventDetail({ event, role,currentUser, categories, onBack, onUpd
   }
 
   function participate(status) {
-    onUpdate({ ...event, my_participation_status: status });
+    if (status === "registered") onRegister(event.id);
+    else if (status === "planned") onPlan(event.id);
   }
 
   function unparticipate() {
-    onUpdate({ ...event, my_participation_status: null });
+    onCancelParticipation(event.id);
   }
 
   function requestReject() {
