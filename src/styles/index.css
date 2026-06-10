@@ -4,6 +4,8 @@
 @import "./events.css";
 @import "./forms.css";
 @import "./users.css";
+@import "./notifications.css";
+@import "./profile.css";
 
 /* LoginPage styles */
 .login-page {

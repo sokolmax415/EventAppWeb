@@ -98,11 +98,13 @@
 
 .user-menu {
   gap: 10px;
+  min-width: 0;
 }
 
 .avatar {
   width: 32px;
   height: 32px;
+  flex: 0 0 32px;
   border-radius: 50%;
   background: #eef2ff;
   display: flex;
@@ -117,6 +119,10 @@
   font-size: 13px;
   color: #374151;
   font-weight: 500;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .role-pill {
@@ -125,6 +131,7 @@
   background: #f3f4f6;
   border-radius: 10px;
   padding: 2px 8px;
+  white-space: nowrap;
 }
 
 .main {
@@ -133,11 +140,48 @@
   padding: 32px 20px;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
 @media (max-width: 700px) {
   .demo-bar,
   .app-header {
     align-items: flex-start;
     flex-direction: column;
     gap: 12px;
+  }
+
+  .app-header {
+    padding: 14px 16px;
+  }
+
+  .header-left {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .nav {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .user-menu {
+    flex: 1 1 auto;
+  }
+
+  .main {
+    width: 100%;
+    padding: 28px 14px;
+    overflow-x: hidden;
   }
 }

@@ -1,0 +1,16 @@
+.profile-sections-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+  min-width: 0;
+}
+
+.profile-sections-grid > * {
+  min-width: 0;
+}
+
+@media (max-width: 700px) {
+  .profile-sections-grid {
+    grid-template-columns: 1fr;
+  }
+}

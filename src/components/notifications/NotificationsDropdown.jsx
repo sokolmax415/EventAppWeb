@@ -21,76 +21,24 @@ export function NotificationsDropdown({ notifications = [], onNotificationClick 
   };
 
   return (
-    <div style={{ position: "relative" }}>
+    <div className="notifications-root">
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        style={{
-          position: "relative",
-          width: 38,
-          height: 38,
-          borderRadius: "50%",
-          border: "1px solid #E5E7EB",
-          background: "#fff",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 18,
-        }}
+        className="notifications-button"
         aria-label="Уведомления"
       >
         🔔
         {unreadCount > 0 && (
-          <span
-            style={{
-              position: "absolute",
-              top: -4,
-              right: -4,
-              minWidth: 18,
-              height: 18,
-              borderRadius: 999,
-              background: "#EF4444",
-              color: "#fff",
-              fontSize: 11,
-              fontWeight: 700,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "0 5px",
-              border: "2px solid #fff",
-            }}
-          >
+          <span className="notifications-count">
             {unreadCount}
           </span>
         )}
       </button>
 
       {isOpen && (
-        <div
-          style={{
-            position: "absolute",
-            top: 48,
-            right: 0,
-            width: 380,
-            background: "#fff",
-            border: "1px solid #E5E7EB",
-            borderRadius: 14,
-            boxShadow: "0 18px 40px rgba(15, 23, 42, 0.16)",
-            zIndex: 20,
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              padding: "16px 18px",
-              borderBottom: "1px solid #F3F4F6",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: 12,
-            }}
-          >
+        <div className="notifications-menu">
+          <div className="notifications-header">
             <div>
               <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#111827" }}>
                 Уведомления
@@ -99,6 +47,14 @@ export function NotificationsDropdown({ notifications = [], onNotificationClick 
                 {unreadCount > 0 ? `Непрочитанных: ${unreadCount}` : "Нет новых уведомлений"}
               </p>
             </div>
+            <button
+              type="button"
+              className="notifications-close"
+              onClick={() => setIsOpen(false)}
+              aria-label="Закрыть уведомления"
+            >
+              ×
+            </button>
           </div>
 
           {notifications.length === 0 ? (
@@ -106,7 +62,7 @@ export function NotificationsDropdown({ notifications = [], onNotificationClick 
               Уведомлений пока нет
             </div>
           ) : (
-            <div style={{ maxHeight: 360, overflowY: "auto" }}>
+            <div className="notifications-list">
               {notifications.map((notification) => (
                 <button
                   key={notification.id}

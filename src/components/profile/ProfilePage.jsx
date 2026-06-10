@@ -106,14 +106,15 @@ export default function ProfilePage({ currentUser, events = [], onUpdateProfile 
 
       {/* Карточка профиля */}
       <section style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 14, padding: 24, marginBottom: 24 }}>
-        <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 16, minWidth: 0 }}>
           <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#EEF2FF", color: "#4F46E5",
-                        display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 700 }}>
+                        display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 700,
+                        flex: "0 0 56px" }}>
             {currentUser.role === "admin" ? "A" : currentUser.name?.charAt(0)?.toUpperCase() || "U"}
           </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, marginBottom: isEditing ? 14 : 0 }}>
-              <div style={{ flex: 1 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, marginBottom: isEditing ? 14 : 0, flexWrap: "wrap" }}>
+              <div style={{ flex: "1 1 220px", minWidth: 0 }}>
                 {isEditing ? (
                   <>
                     <div style={{ marginBottom: 12 }}>
@@ -139,7 +140,7 @@ export default function ProfilePage({ currentUser, events = [], onUpdateProfile 
                     {currentUser.name || "Пользователь"}
                   </h2>
                 )}
-                <p style={{ fontSize: 14, color: "#6B7280", margin: "0 0 10px" }}>{currentUser.email}</p>
+                <p style={{ fontSize: 14, color: "#6B7280", margin: "0 0 10px", overflowWrap: "anywhere" }}>{currentUser.email}</p>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
                   <span style={{ background: "#F3F4F6", color: "#374151", borderRadius: 20, padding: "4px 10px", fontSize: 12, fontWeight: 600 }}>
                     {getRoleLabel(currentUser.role)}
@@ -190,7 +191,7 @@ export default function ProfilePage({ currentUser, events = [], onUpdateProfile 
       </section>
 
       {/* Три колонки с данными */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18 }}>
+      <div className="profile-sections-grid">
         {/* Достижения */}
         <section style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: 14, padding: 20 }}>
           <h2 style={{ fontSize: 18, fontWeight: 700, color: "#111827", margin: "0 0 14px" }}>Мои достижения</h2>
