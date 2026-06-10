@@ -285,7 +285,7 @@ const handleUpdateProfile = async (updatedProfile) => {
             )}
           </nav>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div className="header-actions">
           <NotificationsDropdown
             notifications={notifications}
             onNotificationClick={handleOpenNotification}
